@@ -23,6 +23,16 @@ else
     perm=/07000  # Linux
 fi
 
+# MacOS and Linux also differ in their 'stat' program;
+# this 'script' expects stdin to be a series of null-terminated filenames.
+function showlinks0 {
+    if [ `uname` == "Darwin" ]; then
+        xargs -0 stat -f "'%N' -> '%Y'"
+    else
+        xargs -0 stat -c "%N"
+    fi
+}
+
 echo checking "$@"
 tmp=/tmp/checkfiles$$
 
@@ -39,7 +49,7 @@ echo ""; echo looking for files with more than one hardlink
 find "$@" -type f -links +1 -print | tee -a $tmp
 
 echo ""; echo looking for symbolic links
-find "$@" -type l -print | tee -a $tmp
+find "$@" -type l -print0 | showlinks0 | tee -a $tmp
 
 # was there any output?
 test -s $tmp; errors=$?
