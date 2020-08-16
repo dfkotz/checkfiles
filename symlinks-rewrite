@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# symlinks-rewrite - scan a directory tree and turn all symlinks into
+# small bash scripts that, when executed, recreate the symlink.  The
+# purpose is to enable the saving of a symlink on an unfriendly filesystem
+# like Google Drive, Dropbox, etc., that do not support symlinks.
+#
+# usage:  symlinks-rewrite dir...
+#
+# David Kotz, 2020
+#
+
+# how many directories will we scan?
+if [[ $# -lt 1 ]]; then 
+    echo "usage: symlinks-rewrite dir..."
+    exit 1;
+fi
+
+out=/tmp/symlinks.$$.out
+py=/tmp/symlinks.$$.py
+cat > $py <<EOF
+import os,sys
+errors = 0
+for line in sys.stdin:
+    try:
+        path = line[:-1] # strip trailing newline
+        dest = os.readlink(path)
+    except:
+        print("'%s': cannot read link" % path)
+        errors = errors+1
+    else:
+        try:
+            basename = os.path.basename(path)
+            sidecar = path + ".symlink"
+            with open(sidecar, 'w') as out:
+                print("#!/bin/sh", file=out)
+                print("# execute this file to recreate the symlink", file=out)
+                print("ln -s '%s' '%s'" % (dest, basename), file=out)
+        except:
+            print("'%s': cannot write symlink sidecar" % sidecar)
+            errors = errors+1
+        else:
+            try:
+                os.unlink(path)
+            except:
+                print("'%s': cannot remove symlink" % path)
+                errors = errors+1
+exit(errors)
+
+EOF
+
+# find all the symlinks and process through the above python script
+find "$@" -type l -print | python3 $py
+errors=$?
+
+rm -f $py $out
+
+echo ""
+if [[ $errors != 0 ]]; then
+    echo "TROUBLE FOUND"
+    exit 1
+else
+    echo "all is well"
+    exit 0
+fi
