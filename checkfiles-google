@@ -23,13 +23,18 @@ else
     perm=/07000  # Linux
 fi
 
-# MacOS and Linux also differ in their 'stat' program;
-# this 'script' expects stdin to be a series of null-terminated filenames.
+# This 'script' expects stdin to be a series of null-terminated filenames;
+# it prints out the name of the link and the name of its target.
 function showlinks0 {
+    # Sadly, the 'xargs' and 'stat' commands differ between MacOS and Linux.
+    # xargs: on MacOS, empty input does not run the command; on Linux, need -r
+    # stat: format with -f on MacOS and -c on Linux, with different %specifiers
     if [ `uname` == "Darwin" ]; then
+        # MacOS
         xargs -0 stat -f "'%N' -> '%Y'"
     else
-        xargs -0 stat -c "%N"
+        # Linux
+        xargs -0 -r stat -c "%N"
     fi
 }
 
