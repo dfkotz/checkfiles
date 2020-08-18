@@ -38,11 +38,24 @@ function showlinks0 {
     fi
 }
 
+# Scan a directory for filenames that differ only in case, and thus collide,
+# because MacOS is a case-insensitive file system, and I use Google from there.
+# Expects the name of a directory on each line of stdin.
+function collisions {
+    while IFS= read -r dir
+    do  # sort (fold case) | uniq (ignore case, print only duplicates)
+        ls "$dir" | sort -f | uniq -d -i | sed "s|^|collision: $dir/|p"
+    done
+}
+
 echo checking "$@"
 tmp=/tmp/checkfiles$$
 
 echo ""; echo look for filenames that may not work well on Google or MacOS
 find "$@" -print | gawk -f $0.awk macos=1 google=1 | tee -a $tmp
+
+echo ""; echo look for filenames that differ only in case
+find "$@" -type d -print | collisions | tee -a $tmp
 
 echo ""; echo looking for files and folders you do not own
 find "$@" -not -user `whoami` -print | tee -a $tmp
