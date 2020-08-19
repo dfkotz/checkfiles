@@ -83,7 +83,7 @@ dropbox && /^~/ && /\.tmp$/ { warn("Dropbox will not sync files whose name start
 # (no easy way to check for this, here)
 
 # Dropbox: Avoid syncing files that are symlinks.
-# (no easy way to check for this, here)
+# (no easy way to check for this, here, but see checkfiles-google for an idea)
 
 #########################################################
 # OneDrive: https://support.office.com/en-us/article/invalid-file-names-and-file-types-in-onedrive-onedrive-for-business-and-sharepoint-64883a5d-228e-48f5-b3d2-eb39e07630fa

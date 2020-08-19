@@ -2,8 +2,8 @@
 #
 # checkfiles-google - scan a directory tree and report on files that may cause
 # trouble if the tree is moved to a Google Drive service, or used on MacOS.
-# Looks at filenames, hard links, symbolic links, and unusual permission bits.
-# Google Drive can’t support hard links or symlinks, and permissions &= 0700.
+# Looks at filenames, hard links, and unusual permission bits.
+# Google Drive can’t support hard links, and permissions &= 0700.
 #
 # usage:  checkfiles-google dir...
 #
@@ -66,8 +66,9 @@ find "$@" -perm $perm -print | tee -a $tmp
 echo ""; echo looking for files with more than one hardlink
 find "$@" -type f -links +1 -print | tee -a $tmp
 
-echo ""; echo looking for symbolic links
-find "$@" -type l -print0 | showlinks0 | tee -a $tmp
+# AS OF August 2020, Google Drive supports symlinks
+# echo ""; echo looking for symbolic links
+# find "$@" -type l -print0 | showlinks0 | tee -a $tmp
 
 # was there any output?
 test -s $tmp; errors=$?
