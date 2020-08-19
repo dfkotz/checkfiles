@@ -31,6 +31,8 @@ function error(mesg) {
 ####################################################
 # save the full pathname
 { pathname = $0 }
+# save the directory name, including trailing slash
+{ dirname = pathname; sub(/[^\/]*$/, "", dirname) }
 # but focus most pattern matching on the basename, not the full path
 { sub(/.*\//, "") }
 
@@ -47,6 +49,18 @@ linux && /[`'"]/ { warn("Linux shell may be confused by quotation marks") }
 linux && /[;#|?*!&]/ { warn("Linux shell may be confused by certain punctuation chars") }
 linux && /^~/ { warn("Linux shell may be confused by leading tilde character") }
 linux && /^$/ { warn("Linux shell may be confused by leading dollar-sign") }
+
+#########################################################
+# MacOS errors
+macos {
+    # look for filenames, within a directory, that differ only in case
+    lowerfilename = tolower($0)
+    if ((dirname, lowerfilename) in contents) {
+        error("Filename differs only in case with '" contents[dirname,lowerfilename] "'")
+    } else {
+        contents[dirname,lowerfilename] = $0
+    }
+}
 
 #########################################################
 # MacOS warnings
