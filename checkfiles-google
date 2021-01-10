@@ -41,20 +41,20 @@ function showlinks0 {
 echo checking "$@"
 tmp=/tmp/checkfiles$$
 
-echo ""; echo look for filenames that may not work well on Google or MacOS
+echo ""; echo '# looking for filenames that may not work well on Google or MacOS'
 find "$@" -print | gawk -f $0.awk macos=1 google=1 | tee -a $tmp
 
-echo ""; echo looking for files and folders you do not own
+echo ""; echo '# looking for files and folders you do not own'
 find "$@" -not -user `whoami` -print | tee -a $tmp
 
-echo ""; echo looking for files and folders with unusual permission bits
+echo ""; echo '# looking for files and folders with unusual permission bits'
 find "$@" -perm $perm -print | tee -a $tmp
 
-echo ""; echo looking for files with more than one hardlink
+echo ""; echo '# looking for files with more than one hardlink'
 find "$@" -type f -links +1 -print | tee -a $tmp
 
 # AS OF August 2020, Google Drive supports symlinks
-# echo ""; echo looking for symbolic links
+# echo ""; echo '# looking for symbolic links'
 # find "$@" -type l -print0 | showlinks0 | tee -a $tmp
 
 # was there any output?
@@ -62,6 +62,7 @@ test -s $tmp; errors=$?
 rm -f $tmp
 
 echo ""
+echo "# Summary:"
 if [[ $errors != 1 ]]; then
     echo "TROUBLE FOUND"
     exit 1
