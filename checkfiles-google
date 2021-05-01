@@ -64,9 +64,9 @@ rm -f $tmp
 echo ""
 echo "# Summary:"
 if [[ $errors != 1 ]]; then
-    echo "TROUBLE FOUND"
+    echo "# TROUBLE FOUND"
     exit 1
 else
-    echo "all is well"
+    echo "# all is well"
     exit 0
 fi
